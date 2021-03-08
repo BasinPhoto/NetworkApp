@@ -16,28 +16,28 @@ struct Task: Decodable {
 }
 
 class TaskClass {
-    private let testUrl = "https://jsonplaceholder.typicode.com/users/1/todos"
-    var tasks = [Task]()
     
-    func getData() {
+    static func getData(testUrl: String, completion: @escaping ([Task]) -> ()) {
         guard let url = URL(string: testUrl) else { return }
         
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             if let error = error {
                 print(error.localizedDescription)
+                completion([])
                 return
             }
-            if let data = data {
-                do {
-                    self.tasks = try JSONDecoder().decode([Task].self, from: data)
-                } catch let someError {
-                    print(someError)
-                }
-            }
+            
+            guard let data = data else {
+                completion([])
+                return}
+            
+            guard let task = try? JSONDecoder().decode([Task].self, from: data) else {
+                completion([])
+                return}
+            
+            completion(task)
+
         }.resume()
     }
-    
-    init() {
-        getData()
-    }
+
 }

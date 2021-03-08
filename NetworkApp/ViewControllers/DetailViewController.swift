@@ -14,9 +14,7 @@ class DetailViewController: UIViewController {
     @IBOutlet var titleOfTaskTextField: UITextField!
     @IBOutlet var taskStatusToggle: UISwitch!
     
-    var numberOfSelectedTask: Int!
-    var titleOfSelectedTask: String!
-    var taskStatus: Bool!
+    var editedTask: Task!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,9 +22,9 @@ class DetailViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
 
-        numberOfTaskTextField.text = String(numberOfSelectedTask)
-        titleOfTaskTextField.text = titleOfSelectedTask
-        taskStatusToggle.isOn = taskStatus
+        numberOfTaskTextField.text = String(editedTask.id)
+        titleOfTaskTextField.text = editedTask.title
+        taskStatusToggle.isOn = editedTask.completed
     }
     
     @objc func dismissKeyboard() {
@@ -35,15 +33,15 @@ class DetailViewController: UIViewController {
     
     @IBAction func okButtonPressed(_ sender: Any) {
         
-        numberOfSelectedTask = Int(numberOfTaskTextField.text!)
-        titleOfSelectedTask = titleOfTaskTextField.text!
+        editedTask.id = Int(numberOfTaskTextField.text!) ?? editedTask.id
+        editedTask.title = titleOfTaskTextField.text ?? "none"
         self.performSegue(withIdentifier: "backToList", sender: self)
         
         
     }
     
     @IBAction func toggleStatusOfTask(_ sender: Any) {
-        taskStatus = taskStatusToggle.isOn
+        editedTask.completed = taskStatusToggle.isOn
     }
     
     func showAlert(message: String, alertTitle: String) {

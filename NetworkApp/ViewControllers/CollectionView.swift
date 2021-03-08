@@ -10,36 +10,39 @@ import UIKit
 
 class CollectionView: UICollectionViewController {
     
-    var tasksList = TaskClass()
+    var tasks = [Task]()
     var selectedIndex: Int = 0
-    var selectedNumber: Int!
-    var selectedTitle: String!
+    let testUrl = "https://jsonplaceholder.typicode.com/users/1/todos"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        collectionView.reloadData()
+        TaskClass.getData(testUrl: testUrl) { (tempArray) in
+            DispatchQueue.main.async {
+                self.tasks = tempArray
+                self.collectionView.reloadData()
+            }
+        }
     }
     
     @IBAction func refreshCells(_ sender: Any) {
         collectionView.reloadData()
     }
+
+    
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return tasksList.tasks.count
+        return tasks.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "taskCell", for: indexPath) as! UserCell
-        let task = tasksList.tasks[indexPath.item]
+        let task = tasks[indexPath.item]
         cell.configure(with: task)
         return cell
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedIndex = indexPath.item
-        selectedNumber = tasksList.tasks[selectedIndex].id
-        selectedTitle = tasksList.tasks[selectedIndex].title
         performSegue(withIdentifier: "fromCellSegue", sender: nil)
     }
 
@@ -47,16 +50,12 @@ class CollectionView: UICollectionViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let detailVC = segue.destination as! DetailViewController
-        detailVC.numberOfSelectedTask = tasksList.tasks[selectedIndex].id
-        detailVC.titleOfSelectedTask = tasksList.tasks[selectedIndex].title
-        detailVC.taskStatus = tasksList.tasks[selectedIndex].completed
+        detailVC.editedTask = tasks[selectedIndex]
     }
     
     @IBAction func unwind(for unwindSegue: UIStoryboardSegue) {
         let detailVC = unwindSegue.source as! DetailViewController
-        tasksList.tasks[selectedIndex].id = detailVC.numberOfSelectedTask
-        tasksList.tasks[selectedIndex].title = detailVC.titleOfSelectedTask
-        tasksList.tasks[selectedIndex].completed = detailVC.taskStatus
+        tasks[selectedIndex] = detailVC.editedTask
         collectionView.reloadData()
     }
 
